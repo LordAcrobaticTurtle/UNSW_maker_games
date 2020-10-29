@@ -57,7 +57,7 @@ unsigned long prevPositionComputeTime = 0;
 #define SEND_INTERVAL 100 // milliseconds
 
 //static const int RXPin = 50, TXPin = 51;
-static const uint32_t GPSBaud = 115200;
+static const uint32_t GPSBaud = 9600;
 
 // IMU object
 MPU6050 mpu(Wire);
@@ -76,21 +76,13 @@ GPS2Local GPS2Local;
 
 void setup() {
 	// put your setup code here, to run once:
-	Serial.begin(9600);
+	Serial.begin(115200);
 	for (int i = 2; i <= 13; i++) {
 		pinMode(i, OUTPUT); 
 	}
 	// This configuration makes right turns only 
 
-	digitalWrite(IN1_1, LOW);
-	digitalWrite(IN2_1, HIGH);
-	digitalWrite(IN3_1, LOW);
-	digitalWrite(IN4_1, HIGH);
 
-	digitalWrite(IN1_2, HIGH);
-	digitalWrite(IN2_2, LOW);
-	digitalWrite(IN3_2, LOW);
-	digitalWrite(IN4_2, HIGH); 
 	Serial.println("WAITING ON INPUT");
 
 	// IMU setup
@@ -113,17 +105,13 @@ void setup() {
 	Serial.println("Done!\n");
 	
 	// GPS setup
-	Serial2.begin(GPSBaud);
+	Serial5.begin(GPSBaud);
 	Serial.println(F("Calculating GPS position, do not move"));
-	while (Serial2.available() > 0)
-		if (gps.encode(Serial2.read()))
+	while (Serial5.available() > 0)
+		if (gps.encode(Serial5.read()))
 			GPS2Local.GPSdisplayRawInfo(gps);
 
-	if (millis() > 5000 && gps.charsProcessed() < 10)
-	{
-		Serial.println(F("No GPS detected: check wiring."));
-		while(true);
-	}
+	
 	
 	GPS2Local.init(gps);
 	
@@ -147,21 +135,17 @@ void loop() {
 		DeadReckoner.compute_position(mpu);
 		
 		Serial.print("IMU X: ");
-		Serial.println(DeadReckoner.getX());
+		Serial.print(String(DeadReckoner.getX()) + " ");
 		
 		prevPositionComputeTime = millis();
 	}
   
 	// GPS local positioning
-	while (Serial2.available() > 0)
-		if (gps.encode(Serial2.read()))
+	while (Serial5.available() > 0)
+		if (gps.encode(Serial5.read()))
 			GPS2Local.GPSdisplayRawInfo(gps);
 
-	if (millis() > 5000 && gps.charsProcessed() < 10)
-	{
-		Serial.println(F("No GPS detected: check wiring."));
-		while(true);
-	}
+	
 	
 	GPS2Local.computeLocal(gps);
 
