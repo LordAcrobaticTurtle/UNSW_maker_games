@@ -43,7 +43,6 @@ void setup() {
 	Serial.print(F("Calculating bias, do not move MPU6050"));
 	for (int i = 0; i<200; i++) {
 		mpu.update();
-		//DeadReckoner.update(mpu);
 		DeadReckoner.compute_bias(mpu,i);
   
 		delay(20);
@@ -80,6 +79,10 @@ void loop() {
 		DeadReckoner.compute_velocity(mpu);
 		DeadReckoner.compute_position(mpu);
 		
+		Serial.print("IMU X: "); Serial.print(DeadReckoner.getX()); Serial.print("\t");
+		Serial.print("IMU Y: "); Serial.print(DeadReckoner.getY()); Serial.print("\t");
+		Serial.print("IMU Heading: "); Serial.print(DeadReckoner.getHeading()); Serial.print("\t");
+		
 		prevPositionComputeTime = millis();
 	}
   
@@ -88,15 +91,12 @@ void loop() {
 		if (gps.encode(Serial5.read()))
 			//GPS2Local.GPSdisplayRawInfo(gps);
 	
-	if (gps.location.isUpdated())
+	if (gps.location.isUpdated()) {
 		GPS2Local.computeLocal(gps);
-
-	Serial.print("IMU X: "); Serial.print(DeadReckoner.getX());
-	Serial.print("IMU Y: "); Serial.print(DeadReckoner.getY()); 
-	Serial.print("IMU Heading: "); Serial.print(DeadReckoner.getHeading()); Serial.print("\t");
-	Serial.print("GPS X: "); Serial.print(GPS2Local.GetLocalX());
-	Serial.print("GPS Y: "); Serial.print(GPS2Local.GetLocalY());
-	
+		Serial.print("GPS X: "); Serial.print(GPS2Local.GetLocalX()); Serial.print("\t");
+		Serial.print("GPS Y: "); Serial.print(GPS2Local.GetLocalY()); Serial.print("\t");
+	}
+	Serial.println();
 
 
 	delay(20);
