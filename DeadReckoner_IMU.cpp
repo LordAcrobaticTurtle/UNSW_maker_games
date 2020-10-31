@@ -1,27 +1,11 @@
 #include "DeadReckoner_IMU.h"
 
 DeadReckoner::DeadReckoner():xc(0), yc(0), headingc(0),velXc(0), avgbiasX(0) {};
-/*
-DeadReckoner::DeadReckoner(double x, double y, double heading){
-	xc = x;
-	yc = y;
-	headingc = heading;
-}*/
 
 void DeadReckoner::init_timers(){
 	prevVelocityIntegrationTime = micros();
 	prevPositionIntegrationTime = micros();
 }
-
-/*
-void DeadReckoner::update(MPU6050& mpu) {
-	measuredAngleX = mpu.getAngleX();
-	measuredAngleY = mpu.getAngleY();
-	measuredAngleZ = mpu.getAngleZ();
-	measuredAccelX = mpu.getAccX();
-	measuredAccelY = mpu.getAccX();
-	measuredAccelZ = mpu.getAccX();
-}*/
 
 void DeadReckoner::compute_bias(MPU6050& mpu, int i){
 	avgbiasX = (avgbiasX*i + mpu.getAccX())/(i+1);
@@ -30,7 +14,7 @@ void DeadReckoner::compute_bias(MPU6050& mpu, int i){
 void DeadReckoner::compute_velocity(MPU6050& mpu){
 	double dt = (double)getChange(micros(), prevVelocityIntegrationTime) / 1000000.0; // convert to seconds
 
-	//removing bias?
+	//removing bias
 	adjustedAccelX = mpu.getAccX() - avgbiasX;
   
 	velXc = dt*(prevAccelX + adjustedAccelX)/2 + velXc;
