@@ -1,13 +1,22 @@
 // UNSW Maker Games 2020 code
 
-#include "Wire.h"
+
 #include <MPU6050_light.h>
 #include <TinyGPS++.h>
 #include <SoftwareSerial.h>
-
+#include <SBUS.h>
 #include "serial_input_control.h"
 #include "DeadReckoner_IMU.h"
 #include "GPS2Local.h"
+#include "Wire.h"
+#include "wheel.h"
+
+
+// TX object + accompanying variables
+SBUS tx(Serial1);
+uint16_t channels[16];
+bool failsafe;
+bool lostframe; 
 
 // IMU object
 MPU6050 mpu(Wire);
@@ -24,13 +33,36 @@ GPS2Local GPS2Local;
 // Variables
 unsigned long prevPositionComputeTime = 0;
 
+wheel WheelFR;
+wheel WheelFL;
+wheel WheelBL;
+wheel WheelBR;
+
+
+int ENA_1 = 22;
+int ENB_1 = 23;
+
+// REAR DRIVER
+int IN1_1 = 16;
+int IN2_1 = 15;
+int IN3_1 = 14;
+int IN4_1 = 17;
+
+int ENA_2 = 35;
+int ENB_2 = 36;
+
+// FORWARD DRIVER
+int IN1_2 = 25;
+int IN2_2 = 26;
+int IN3_2 = 27;
+int IN4_2 = 28;
+
+
 void setup() {
 	// put your setup code here, to run once:
 	Serial.begin(115200);
-	for (int i = 2; i <= 13; i++) {
-		pinMode(i, OUTPUT); 
-	}
-
+	
+  tx.begin();
 	// IMU setup
 	Wire.begin();
 	mpu.begin();
@@ -64,7 +96,10 @@ void setup() {
 	GPS2Local.init(gps);
 	
 	Serial.println("Done!");
-  
+  WheelFL.setup(IN1_1, IN2_1, ENA_1);
+  WheelFL.setup(IN3_1, IN4_1, ENB_1);
+  WheelFL.setup(IN1_2, IN2_2, ENA_2);
+  WheelFL.setup(IN3_2, IN4_2, ENA_2);
 	// Timers init
 	DeadReckoner.init_timers();
 }
@@ -98,6 +133,6 @@ void loop() {
 	}
 	Serial.println();
 
-
+  WheelFR.writeToMotor(0);
 	delay(20);
 }
