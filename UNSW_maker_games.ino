@@ -8,6 +8,7 @@
 #include "serial_input_control.h"
 #include "DeadReckoner_IMU.h"
 #include "GPS2Local.h"
+#include "drive.h"
 
 // IMU object
 MPU6050 mpu(Wire);
@@ -20,6 +21,9 @@ TinyGPSPlus gps;
 
 // GPS to local object
 GPS2Local GPS2Local;
+
+// Driving
+Drive Drive;
 
 // Variables
 unsigned long prevPositionComputeTime = 0;
@@ -76,8 +80,7 @@ void loop() {
 	if (millis() - prevPositionComputeTime > 50) {	// milliseconds
 		mpu.update();
 		
-		DeadReckoner.compute_velocity(mpu);
-		DeadReckoner.compute_position(mpu);
+		DeadReckoner.compute_state(mpu);
 		
 		Serial.print("IMU X: "); Serial.print(DeadReckoner.getX()); Serial.print("\t");
 		Serial.print("IMU Y: "); Serial.print(DeadReckoner.getY()); Serial.print("\t");
@@ -98,6 +101,10 @@ void loop() {
 	}
 	Serial.println();
 
+	Drive.waypoint(2,0,1,DeadReckoner);
+	
+	
+	
 
-	delay(20);
+	//delay(20);
 }
