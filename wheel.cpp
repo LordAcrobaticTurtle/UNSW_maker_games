@@ -10,14 +10,20 @@ void wheel::setup(int p1, int p2, int PWM_pin) {
   IN1_state = true;
   IN2_state = false;
   digitalWrite(IN1, IN1_state);
-  digitalWrite(IN2, IN1_state);
+  digitalWrite(IN2, IN2_state);
+  left_true = true;
   analogWrite(PWM, 0);
 }
 
 // True/false values dictate direction of spin
 void wheel::changeDirection(bool state) {
-  IN1_state = state;
-  IN2_state = ~state;
+  if (left_true) {
+    IN1_state = state;
+    IN2_state = !state;
+  } else {
+    IN1_state = !state;
+    IN2_state = state;
+  }
   digitalWrite(IN1, IN1_state);
   digitalWrite(IN2, IN2_state);
 }

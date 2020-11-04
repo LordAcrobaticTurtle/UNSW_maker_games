@@ -12,9 +12,12 @@ class wheel {
     int PWM;
     bool IN1_state;
     bool IN2_state;
-    
+    bool left_true = 0;
   public:
-
+    int setLeftTrue(bool T) {
+      left_true = T;
+    }
+    
     int getPin1() {
       return IN1;
     }
