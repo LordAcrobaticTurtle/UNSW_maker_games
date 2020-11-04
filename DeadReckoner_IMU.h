@@ -12,8 +12,7 @@ class DeadReckoner {
 public:
 	DeadReckoner();
 	void init_timers();
-	void compute_velocity(MPU6050& mpu);
-	void compute_position(MPU6050& mpu);
+	void compute_state(MPU6050& mpu);
 	double getX();
 	double getY();
 	double getHeading();
@@ -22,6 +21,7 @@ public:
 	~DeadReckoner();
 
 private:
+	void compute_velocity(MPU6050& mpu);
 	double xc, yc, headingc;
 	double velXc;
 	double adjustedAccelX;
