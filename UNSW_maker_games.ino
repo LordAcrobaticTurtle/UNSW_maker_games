@@ -62,7 +62,7 @@ int IN2_2 = 26;
 int IN3_2 = 27;
 int IN4_2 = 28;
 
-Servo s;
+//Servo s;
 
 NewPing SonarFL(3,2 ,MAX_DISTANCE); // Echo = 2, Trig = 3;     
 NewPing SonarFR(11,12,MAX_DISTANCE); // Echo = 12, Trig = 11
@@ -80,7 +80,7 @@ void setup() {
 	// IMU setup
 	Wire.begin();
 	mpu.begin();
-  s.attach(10);
+ // s.attach(10);
   /*
 	Serial.print(F("Calculating gyro offset, do not move MPU6050"));
 	delay(1000);
@@ -135,9 +135,9 @@ void loop() {
   int yaw = channels[0]; 
   int mapped_throttle = map(throttle, 172, 1800, 0,500);
   int mapped_yaw = map(yaw, 182, 1800, -500, 500);
-  int mapped_ESC = map(throttle, 172, 1800, 1000,2000);
-  mapped_ESC = constrain(mapped_ESC,1000,2000);
-  s.writeMicroseconds(mapped_ESC);
+  //int mapped_ESC = map(throttle, 172, 1800, 1000,2000);
+  //mapped_ESC = constrain(mapped_ESC,1000,2000);
+  //s.writeMicroseconds(mapped_ESC);
   mapped_yaw = constrain(mapped_yaw, -250,250);
   
   if (i == 4) { 
