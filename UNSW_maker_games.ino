@@ -1,18 +1,21 @@
 // UNSW Maker Games 2020 code
 
 
-#include <MPU6050_light.h>
+
 #include <TinyGPS++.h>
 #include <SoftwareSerial.h>
 #include <SBUS.h>
 #include <Servo.h>
+#include <NewPing.h>
+#include <MPU6050_light.h>
 #include "serial_input_control.h"
 #include "DeadReckoner_IMU.h"
 #include "GPS2Local.h"
 #include "Wire.h"
 #include "wheel.h"
 
-
+#define NUM_EDGE_SENSORS 4
+#define MAX_DISTANCE 200 // In cm 
 // TX object + accompanying variables
 SBUS tx(Serial1);
 uint16_t channels[16];
@@ -59,7 +62,14 @@ int IN2_2 = 26;
 int IN3_2 = 27;
 int IN4_2 = 28;
 
-//Servo s;
+Servo s;
+
+NewPing SonarFL(3,2 ,MAX_DISTANCE); // Echo = 2, Trig = 3;     
+NewPing SonarFR(11,12,MAX_DISTANCE); // Echo = 12, Trig = 11
+NewPing SonarBL(21,20,MAX_DISTANCE); // Echo = 20, Trig = 21
+NewPing SonarBR(37,38,MAX_DISTANCE); //  Echo = 38, Trig = 37
+
+NewPing Sonar[4] = {SonarFL, SonarFR, SonarBL, SonarBR};
 
 void setup() {
 	// put your setup code here, to run once:
@@ -70,7 +80,7 @@ void setup() {
 	// IMU setup
 	Wire.begin();
 	mpu.begin();
-  //s.attach(10);
+  s.attach(10);
   /*
 	Serial.print(F("Calculating gyro offset, do not move MPU6050"));
 	delay(1000);
@@ -101,6 +111,7 @@ void setup() {
 	
 	GPS2Local.init(gps);
 	*/
+  
 	Serial.println("Done!");
   WheelFL.setup(IN1_2, IN2_2, ENA_2);
   WheelFL.setLeftTrue(false);
@@ -126,11 +137,16 @@ void loop() {
   int mapped_yaw = map(yaw, 182, 1800, -500, 500);
   int mapped_ESC = map(throttle, 172, 1800, 1000,2000);
   mapped_ESC = constrain(mapped_ESC,1000,2000);
-  //s.writeMicroseconds(mapped_ESC);
+  s.writeMicroseconds(mapped_ESC);
   mapped_yaw = constrain(mapped_yaw, -250,250);
+  
   if (i == 4) { 
   //  print_RC();
-    Serial.println(String(mapped_throttle) + " " + String(mapped_yaw));
+    //Serial.println(String(mapped_throttle) + " " + String(mapped_yaw));
+    for (int j = 0; j < NUM_EDGE_SENSORS; j++) {
+      Serial.print(String(Sonar[j].ping_cm()) + ",  ");
+    }
+    Serial.println();
     i = 0;
   } else {
     i++;
@@ -147,7 +163,7 @@ void loop() {
     WheelBL.writeToMotor(250);
     WheelBR.writeToMotor(250);
   }
-  delay(5);
+  delay(10);
 }
 
 /*
