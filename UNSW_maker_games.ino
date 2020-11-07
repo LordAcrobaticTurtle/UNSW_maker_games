@@ -16,6 +16,9 @@
 
 #define NUM_EDGE_SENSORS 4
 #define MAX_DISTANCE 200 // In cm 
+#define PID_TIME_INTERVAL 10 // ms
+#define MAX_I_TERM 1
+#define PID_MAX 250
 // TX object + accompanying variables
 SBUS tx(Serial1);
 uint16_t channels[16];
@@ -71,6 +74,7 @@ NewPing SonarBR(37,38,MAX_DISTANCE); //  Echo = 38, Trig = 37
 
 NewPing Sonar[4] = {SonarFL, SonarFR, SonarBL, SonarBR};
 
+
 void setup() {
 	// put your setup code here, to run once:
 	Serial.begin(115200);
@@ -80,7 +84,7 @@ void setup() {
 	// IMU setup
 	Wire.begin();
 	mpu.begin();
- // s.attach(10);
+  //s.attach(10);
   /*
 	Serial.print(F("Calculating gyro offset, do not move MPU6050"));
 	delay(1000);
@@ -123,24 +127,35 @@ void setup() {
 	DeadReckoner.init_timers();
 }
 int i = 0;
+long int timer1 = 0;
+long int timer2 = 0;
+int mapped_yaw = 0;
 void loop() {
 	// put your main code here, to run repeatedly:
   
 	// IMU Dead Reckoning
 	
   tx.read(channels, &failsafe, &lostframe);
-  
   int throttle = channels[2];
-  
   int yaw = channels[0]; 
   int mapped_throttle = map(throttle, 172, 1800, 0,500);
-  int mapped_yaw = map(yaw, 182, 1800, -500, 500);
-  //int mapped_ESC = map(throttle, 172, 1800, 1000,2000);
-  //mapped_ESC = constrain(mapped_ESC,1000,2000);
+  mapped_yaw += map(yaw, 180,1800, -5,5);
+  int mapped_ESC = map(throttle, 172, 1800, 1000,2000);
+  mapped_ESC = constrain(mapped_ESC,1000,2000);
   //s.writeMicroseconds(mapped_ESC);
   mapped_yaw = constrain(mapped_yaw, -250,250);
+  drive(mapped_throttle, mapped_yaw);
   
-  if (i == 4) { 
+  long int curr = millis();
+  if (curr - timer1 >= PID_TIME_INTERVAL) {
+    rotate_to_angle(mapped_throttle, mapped_yaw);
+    timer1 = curr;  
+  }
+  
+  
+  
+
+/*  if (i == 4) { 
   //  print_RC();
     //Serial.println(String(mapped_throttle) + " " + String(mapped_yaw));
     for (int j = 0; j < NUM_EDGE_SENSORS; j++) {
@@ -151,7 +166,35 @@ void loop() {
   } else {
     i++;
   }
+  */
+
+}
+
+double yaw_errorsum = 0;
+double prev_angle_z = 0;
+void rotate_to_angle(double throttle, double angle) {
+  // Angle is target
+  // mapped_yaw is output
   
+  double out = PID_function(angle, mpu.getAngleZ(), 1,0,0, &yaw_errorsum, &prev_angle_z);
+  Serial.println(out);
+  drive(throttle, out);
+  
+}
+
+double PID_function(double target, double curr_value, double kp, double ki, double kd, double * errorsum, double * prev_value) {
+  double ret = 0;
+  double error = target - curr_value;
+  *errorsum += (double) PID_TIME_INTERVAL * ki * error;
+  *errorsum = constrain(*errorsum, -MAX_I_TERM, MAX_I_TERM);
+  double dinput = curr_value - *prev_value;
+  *prev_value = curr_value;
+  ret = constrain((double) error*kp + dinput * kd / PID_TIME_INTERVAL + *errorsum, -PID_MAX, PID_MAX);
+  return ret;
+}
+
+
+void drive(int mapped_throttle, int mapped_yaw) {
   if (channels[5] > 1500) {
     WheelFL.writeToMotor(mapped_throttle + mapped_yaw);
     WheelFR.writeToMotor(mapped_throttle - mapped_yaw);
@@ -162,8 +205,7 @@ void loop() {
     WheelFR.writeToMotor(250);
     WheelBL.writeToMotor(250);
     WheelBR.writeToMotor(250);
-  }
-  delay(10);
+  } 
 }
 
 /*

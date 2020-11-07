@@ -1,9 +1,9 @@
 #include <Arduino.h>
 
 
-#define MOTOR_MID_VAL 250
-#define MOTOR_MIN_VAL 0
-#define MOTOR_MAX_VAL 500
+#define MOTOR_MID_VAL 0
+#define MOTOR_MIN_VAL -250
+#define MOTOR_MAX_VAL 250
 
 class wheel {
   private:
@@ -14,7 +14,7 @@ class wheel {
     bool IN2_state;
     bool left_true = 0;
   public:
-    int setLeftTrue(bool T) {
+    void setLeftTrue(bool T) {
       left_true = T;
     }
     
