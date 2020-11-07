@@ -10,8 +10,9 @@ public:
 	Drive();
 	~Drive();
 	void motor_control(int frontleft, int frontright, int rearleft, int rearright);
-	void waypoint(double x, double y, int dir, DeadReckoner& DeadReckoner);
+	bool waypoint(double x, double y, int dir, DeadReckoner& DeadReckoner);
 	bool rotate(double rotate_angle, DeadReckoner& DeadReckoner);
+  bool linear(int distance, int dir);
 
 private:
 	double targetX;

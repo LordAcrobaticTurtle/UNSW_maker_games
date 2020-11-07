@@ -63,7 +63,9 @@ bool Drive::waypoint(double x, double y, int dir, DeadReckoner& DeadReckoner) {
 	double rotate_angle = DeadReckoner.getHeading() - (-atan2(abs(targetY-DeadReckoner.getY()), abs(targetX-DeadReckoner.getX())) * 180.0 / PI + 90); 
 	if(rotate(rotate_angle, DeadReckoner)) {
 		double distance = sqrt((targetY-DeadReckoner.getY())*(targetY-DeadReckoner.getY()) + (targetX-DeadReckoner.getX())*(targetX-DeadReckoner.getX()));
-		linear(distance, dir);
+		bool there = linear(distance, dir);
+		if(there == 1)
+			return 1;
 	}
 	return 0;
 }
@@ -93,15 +95,14 @@ bool Drive::linear(int distance, int dir) {
 	// returns 1 when reached
 	// run function in a loop
 	
+	if(abs(distance)>0) {
+		motor_control(255,255,255,255);
+		return 0;
+	}
+	else {
+		motor_control(0,0,0,0);
+		return 1;
+	}
 	
-	XError = abs(DeadReckoner.getX() - targetX);
-	TError = abs(DeadReckoner.getY() - targetY);
+
 }
-
-
-
-
-
-
-
-
