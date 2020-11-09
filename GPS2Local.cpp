@@ -17,8 +17,8 @@ void GPS2Local::computeLocal(TinyGPSPlus& gps){
 	double distanceToOrigin = gps.distanceBetween(LatOrigin,LngOrigin,gps.location.lat(),gps.location.lng());
 	double angleToOrigin = gps.courseTo(LatOrigin,LngOrigin,gps.location.lat(),gps.location.lng());
 	// returns course in degrees (North=0, West=270) from position 1 to position 2
-	LocalX = distanceToOrigin*cos(angleToOrigin);
-	LocalY = distanceToOrigin*sin(angleToOrigin);
+	LocalX = distanceToOrigin*cos(angleToOrigin * PI / 180.0 );
+	LocalY = distanceToOrigin*sin(angleToOrigin * PI / 180.0 );
 }
 
 double GPS2Local::GetLocalX(){

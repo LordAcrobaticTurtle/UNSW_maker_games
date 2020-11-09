@@ -1,6 +1,6 @@
 #include "DeadReckoner_IMU.h"
 
-DeadReckoner::DeadReckoner():xc(0), yc(0), headingc(0),velXc(0), avgbiasX(0) {};
+DeadReckoner::DeadReckoner() : xc(0), yc(0), headingc(0),velXc(0), avgbiasX(0) {};
 
 void DeadReckoner::init_timers(){
 	prevVelocityIntegrationTime = micros();
@@ -17,6 +17,7 @@ void DeadReckoner::compute_velocity(MPU6050& mpu){
 	//removing bias
 	adjustedAccelX = mpu.getAccX() - avgbiasX;
   
+	// integration: trapezoidal rule
 	velXc = dt*(prevAccelX + adjustedAccelX)/2 + velXc;
 	
 	
@@ -24,16 +25,18 @@ void DeadReckoner::compute_velocity(MPU6050& mpu){
 	prevVelocityIntegrationTime = micros();
 }
 
-void DeadReckoner::compute_position(MPU6050& mpu){
+void DeadReckoner::compute_state(MPU6050& mpu){
 	// xdot = v(t)*cos(theta(t))
     // ydot = v(t)*sin(theta(t))
     // thetadot = omega(t)
 	// state vector X = [x; y; heading]
 	
+	compute_velocity(mpu);
+	
 	double dt = (double)getChange(micros(), prevPositionIntegrationTime) / 1000000.0; // convert to seconds
 	
-	xc = xc + dt * velXc * cos(headingc);
-  	yc = yc + dt * velXc * sin(headingc);
+	xc = xc + dt * velXc * cos(headingc * PI / 180.0);
+  	yc = yc + dt * velXc * sin(headingc * PI / 180.0);
   	headingc = mpu.getAngleZ();
 	
 	prevPositionIntegrationTime = micros();
