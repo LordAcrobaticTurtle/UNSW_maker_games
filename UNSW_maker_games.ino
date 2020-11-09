@@ -68,7 +68,7 @@ int IN4_2 = 28;
 //Servo s;
 
 NewPing SonarFL(3,2 ,MAX_DISTANCE); // Echo = 2, Trig = 3;     
-NewPing SonarFR(11,12,MAX_DISTANCE); // Echo = 12, Trig = 11
+NewPing SonarFR(11,10,MAX_DISTANCE); // Echo = 10, Trig = 11
 NewPing SonarBL(21,20,MAX_DISTANCE); // Echo = 20, Trig = 21
 NewPing SonarBR(37,38,MAX_DISTANCE); //  Echo = 38, Trig = 37
 
@@ -146,16 +146,15 @@ void loop() {
   mapped_yaw = constrain(mapped_yaw, -250,250);
   drive(mapped_throttle, mapped_yaw);
   
-  long int curr = millis();
+  /*long int curr = millis();
   if (curr - timer1 >= PID_TIME_INTERVAL) {
     rotate_to_angle(mapped_throttle, mapped_yaw);
     timer1 = curr;  
   }
-  
-  
+  */
   
 
-/*  if (i == 4) { 
+  if (i == 4) { 
   //  print_RC();
     //Serial.println(String(mapped_throttle) + " " + String(mapped_yaw));
     for (int j = 0; j < NUM_EDGE_SENSORS; j++) {
@@ -166,7 +165,7 @@ void loop() {
   } else {
     i++;
   }
-  */
+  delay(30);
 
 }
 
