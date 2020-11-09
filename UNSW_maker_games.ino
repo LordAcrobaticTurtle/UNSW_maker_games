@@ -116,10 +116,19 @@ void loop() {
 		mpu.update();
 		prevPositionComputeTime = millis();
 	}
-	WheelFL.writeToMotor(375);
-	WheelFR.writeToMotor(375);
-	WheelBL.writeToMotor(375);
-	WheelBR.writeToMotor(375);
+	
+	if (panel < 4) {
+		WheelFL.writeToMotor(375);
+		WheelFR.writeToMotor(375);
+		WheelBL.writeToMotor(375);
+		WheelBR.writeToMotor(375);
+	}
+	else {
+		WheelFL.writeToMotor(250);
+		WheelFR.writeToMotor(250);
+		WheelBL.writeToMotor(250);
+		WheelBR.writeToMotor(250);
+	}
 	
 	if (is_edge_back())
 		timer++;
@@ -138,14 +147,32 @@ void loop() {
 		// turn 90
 		verb = 1;
 	}
+	else {
+		WheelFL.writeToMotor(250);
+		WheelFR.writeToMotor(250);
+		WheelBL.writeToMotor(250);
+		WheelBR.writeToMotor(250);
+	}
 	
 	if (panel == MAV_LENGTH && verb == 1) {
 		// straight
+	}
+	else {
+		WheelFL.writeToMotor(250);
+		WheelFR.writeToMotor(250);
+		WheelBL.writeToMotor(250);
+		WheelBR.writeToMotor(250);
 	}
 	
 	if (is_edge_front() && panel == MAV_LENGTH && verb == 1) {
 		// turn 90
 		verb = 0;
+	}
+	else {
+		WheelFL.writeToMotor(250);
+		WheelFR.writeToMotor(250);
+		WheelBL.writeToMotor(250);
+		WheelBR.writeToMotor(250);
 	}
 	
 	while (is_edge_left()){
