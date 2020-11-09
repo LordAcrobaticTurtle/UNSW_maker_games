@@ -29,6 +29,7 @@ double threshold = 1;
 int panel = 0;
 #define MAV_LENGTH 4
 int verb = 0;
+inte timer = 0;
 
 // Variables
 wheel WheelFR;
@@ -121,7 +122,12 @@ void loop() {
 	WheelBR.writeToMotor(375);
 	
 	if (is_edge_back())
+		timer++;
+	
+	if (~is_edge_back() && timer > 100) {
 		panel++;
+		timer = 0;
+	}
 	
 	if (is_edge_front() && panel == MAV_LENGTH && verb == 0) {
 		// turn 90
