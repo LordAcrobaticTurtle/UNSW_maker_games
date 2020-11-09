@@ -129,6 +129,11 @@ void loop() {
 		timer = 0;
 	}
 	
+	if (~is_edge_back() && timer < 100) {
+		timer = 0;
+	}
+	
+	
 	if (is_edge_front() && panel == MAV_LENGTH && verb == 0) {
 		// turn 90
 		verb = 1;
