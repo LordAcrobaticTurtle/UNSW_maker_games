@@ -1,3 +1,4 @@
+
 // UNSW Maker Games 2020 code
 
 
@@ -7,6 +8,7 @@
 #include <SBUS.h>
 #include <Servo.h>
 #include <NewPing.h>
+#include <PID_v1.h>
 #include <MPU6050_light.h>
 #include "serial_input_control.h"
 #include "DeadReckoner_IMU.h"
@@ -65,7 +67,8 @@ int IN2_2 = 26;
 int IN3_2 = 27;
 int IN4_2 = 28;
 
-//Servo s;
+Servo front;
+Servo rear;
 
 NewPing SonarFL(3,2 ,MAX_DISTANCE); // Echo = 2, Trig = 3;     
 NewPing SonarFR(11,10,MAX_DISTANCE); // Echo = 10, Trig = 11
@@ -73,7 +76,15 @@ NewPing SonarBL(21,20,MAX_DISTANCE); // Echo = 20, Trig = 21
 NewPing SonarBR(37,38,MAX_DISTANCE); //  Echo = 38, Trig = 37
 
 NewPing Sonar[4] = {SonarFL, SonarFR, SonarBL, SonarBR};
+int Sonar_results[4];
+double out;
+double in;
+double setpoint;
+double kp = 1;
+double ki = 0;
+double kd = 0;
 
+PID yaw_PID(&in, &out, &setpoint, kp, ki,kd,DIRECT);
 
 void setup() {
 	// put your setup code here, to run once:
@@ -84,7 +95,8 @@ void setup() {
 	// IMU setup
 	Wire.begin();
 	mpu.begin();
-  //s.attach(10);
+  front.attach(6);
+  rear.attach(7);
   /*
 	Serial.print(F("Calculating gyro offset, do not move MPU6050"));
 	delay(1000);
@@ -125,6 +137,7 @@ void setup() {
   WheelBR.setup(IN1_1, IN2_1, ENA_1);
 	// Timers init
 	DeadReckoner.init_timers();
+  yaw_PID.SetMode(AUTOMATIC);
 }
 int i = 0;
 long int timer1 = 0;
@@ -134,62 +147,45 @@ void loop() {
 	// put your main code here, to run repeatedly:
   
 	// IMU Dead Reckoning
-	
+	mpu.update();
+  
   tx.read(channels, &failsafe, &lostframe);
   int throttle = channels[2];
   int yaw = channels[0]; 
-  int mapped_throttle = map(throttle, 172, 1800, 0,500);
-  mapped_yaw += map(yaw, 180,1800, -5,5);
-  int mapped_ESC = map(throttle, 172, 1800, 1000,2000);
-  mapped_ESC = constrain(mapped_ESC,1000,2000);
-  //s.writeMicroseconds(mapped_ESC);
-  mapped_yaw = constrain(mapped_yaw, -250,250);
-  drive(mapped_throttle, mapped_yaw);
+  int mapped_throttle = map(throttle, 172, 1800, -255,255);
+  mapped_yaw = map(yaw, 180,1800, -255,255);
   
-  /*long int curr = millis();
-  if (curr - timer1 >= PID_TIME_INTERVAL) {
-    rotate_to_angle(mapped_throttle, mapped_yaw);
-    timer1 = curr;  
-  }
+  /*int front_pos = map(channels[6], 170,1800,1000,2000);
+  front.writeMicroseconds(front_pos);
+  int back_pos = map(channels[7], 170,1800,1000,2000);
+  rear.writeMicroseconds(back_pos);
   */
   
-
-  if (i == 4) { 
-  //  print_RC();
-    //Serial.println(String(mapped_throttle) + " " + String(mapped_yaw));
-    for (int j = 0; j < NUM_EDGE_SENSORS; j++) {
-      Serial.print(String(Sonar[j].ping_cm()) + ",  ");
-    }
-    Serial.println();
-    i = 0;
-  } else {
-    i++;
+  for (int j = 0; j < 4; j++) {
+    Serial.println(String(Sonar[j].ping_cm()) + ", ");
   }
-  delay(30);
-
+  drive(throttle, mapped_yaw);
+  
+  //int mapped_ESC = map(throttle, 172, 1800, 1000,2000);
+  //mapped_ESC = constrain(mapped_ESC,1000,2000);
+  //s.writeMicroseconds(mapped_ESC);
+  //mapped_yaw = constrain(mapped_yaw, 0,360);
+  //rotate_to_angle(mapped_throttle, mapped_yaw);
+  //drive(mapped_throttle, mapped_yaw);
+  
 }
 
 double yaw_errorsum = 0;
 double prev_angle_z = 0;
-void rotate_to_angle(double throttle, double angle) {
+int rotate_to_angle(double throttle, double angle) {
   // Angle is target
   // mapped_yaw is output
   
-  double out = PID_function(angle, mpu.getAngleZ(), 1,0,0, &yaw_errorsum, &prev_angle_z);
-  Serial.println(out);
-  drive(throttle, out);
+  in = mpu.getAngleZ();
+  setpoint = angle;
+  yaw_PID.Compute();
+  Serial.println(String(in) + ", " + String(setpoint) + ", " + String(out));
   
-}
-
-double PID_function(double target, double curr_value, double kp, double ki, double kd, double * errorsum, double * prev_value) {
-  double ret = 0;
-  double error = target - curr_value;
-  *errorsum += (double) PID_TIME_INTERVAL * ki * error;
-  *errorsum = constrain(*errorsum, -MAX_I_TERM, MAX_I_TERM);
-  double dinput = curr_value - *prev_value;
-  *prev_value = curr_value;
-  ret = constrain((double) error*kp + dinput * kd / PID_TIME_INTERVAL + *errorsum, -PID_MAX, PID_MAX);
-  return ret;
 }
 
 

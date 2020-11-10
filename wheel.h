@@ -2,8 +2,8 @@
 
 
 #define MOTOR_MID_VAL 0
-#define MOTOR_MIN_VAL -250
-#define MOTOR_MAX_VAL 250
+#define MOTOR_MIN_VAL -255
+#define MOTOR_MAX_VAL 255
 
 class wheel {
   private:
