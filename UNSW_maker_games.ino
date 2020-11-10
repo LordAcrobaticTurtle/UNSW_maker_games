@@ -104,30 +104,38 @@ void setup() {
 int i = 0;
 void loop() {
 	// put your main code here, to run repeatedly:
+	tx.read(channels, &failsafe, &lostframe);
 	
-	if (stop) {
+	if (channels[5] > 1500) {
+		if (stop) {
+			WheelFL.writeToMotor(250);
+			WheelFR.writeToMotor(250);
+			WheelBL.writeToMotor(250);
+			WheelBR.writeToMotor(250);
+		}
+		else {
+			WheelFL.writeToMotor(500);
+			WheelFR.writeToMotor(500);
+			WheelBL.writeToMotor(500);
+			WheelBR.writeToMotor(500);
+		}
+		
+		if (is_edge_front())
+			timer++;
+		
+		if (is_edge_front() && timer > time_edge) {
+			stop = 1;
+			timer = 0;
+		}
+		
+		if (~is_edge_front() && timer < time_edge) {
+			timer = 0;
+		}
+	} else {
 		WheelFL.writeToMotor(250);
 		WheelFR.writeToMotor(250);
 		WheelBL.writeToMotor(250);
 		WheelBR.writeToMotor(250);
-	}
-	else {
-		WheelFL.writeToMotor(500);
-		WheelFR.writeToMotor(500);
-		WheelBL.writeToMotor(500);
-		WheelBR.writeToMotor(500);
-	}
-	
-	if (is_edge_front())
-		timer++;
-	
-	if (is_edge_front() && timer > time_edge) {
-		stop = 1;
-		timer = 0;
-	}
-	
-	if (~is_edge_front() && timer < time_edge) {
-		timer = 0;
 	}
 	
 	delay(10);
