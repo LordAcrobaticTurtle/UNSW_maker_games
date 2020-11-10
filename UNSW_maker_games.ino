@@ -25,11 +25,14 @@ bool lostframe;
 MPU6050 mpu(Wire);
 
 unsigned long prevPositionComputeTime = 0;
-double threshold = 1;
 int panel = 0;
 #define MAV_LENGTH 4
 int verb = 0;
-inte timer = 0;
+int timer = 0;
+bool stop = 0;
+
+double threshold = 10;
+#define time_edge 50
 
 // Variables
 wheel WheelFR;
@@ -96,97 +99,35 @@ void setup() {
 	}
 	Serial.println("Done!");
 	
-	while(~is_first_panel()) {
-		WheelFL.writeToMotor(375);
-		WheelFR.writeToMotor(375);
-		WheelBL.writeToMotor(375);
-		WheelBR.writeToMotor(375);
-	}
-	WheelFL.writeToMotor(250);
-	WheelFR.writeToMotor(250);
-	WheelBL.writeToMotor(250);
-	WheelBR.writeToMotor(250);
-	panel++;
 }
 
 int i = 0;
 void loop() {
 	// put your main code here, to run repeatedly:
-	if (millis() - prevPositionComputeTime > 50) { // milliseconds
-		mpu.update();
-		prevPositionComputeTime = millis();
-	}
 	
-	if (panel < 4) {
-		WheelFL.writeToMotor(375);
-		WheelFR.writeToMotor(375);
-		WheelBL.writeToMotor(375);
-		WheelBR.writeToMotor(375);
-	}
-	else {
+	if (stop) {
 		WheelFL.writeToMotor(250);
 		WheelFR.writeToMotor(250);
 		WheelBL.writeToMotor(250);
 		WheelBR.writeToMotor(250);
 	}
+	else {
+		WheelFL.writeToMotor(500);
+		WheelFR.writeToMotor(500);
+		WheelBL.writeToMotor(500);
+		WheelBR.writeToMotor(500);
+	}
 	
-	if (is_edge_back())
+	if (is_edge_front())
 		timer++;
 	
-	if (~is_edge_back() && timer > 100) {
-		panel++;
+	if (is_edge_front() && timer > time_edge) {
+		stop = 1;
 		timer = 0;
 	}
 	
-	if (~is_edge_back() && timer < 100) {
+	if (~is_edge_front() && timer < time_edge) {
 		timer = 0;
-	}
-	
-	
-	if (is_edge_front() && panel == MAV_LENGTH && verb == 0) {
-		// turn 90
-		verb = 1;
-	}
-	else {
-		WheelFL.writeToMotor(250);
-		WheelFR.writeToMotor(250);
-		WheelBL.writeToMotor(250);
-		WheelBR.writeToMotor(250);
-	}
-	
-	if (panel == MAV_LENGTH && verb == 1) {
-		// straight
-	}
-	else {
-		WheelFL.writeToMotor(250);
-		WheelFR.writeToMotor(250);
-		WheelBL.writeToMotor(250);
-		WheelBR.writeToMotor(250);
-	}
-	
-	if (is_edge_front() && panel == MAV_LENGTH && verb == 1) {
-		// turn 90
-		verb = 0;
-	}
-	else {
-		WheelFL.writeToMotor(250);
-		WheelFR.writeToMotor(250);
-		WheelBL.writeToMotor(250);
-		WheelBR.writeToMotor(250);
-	}
-	
-	while (is_edge_left()){
-		WheelFL.writeToMotor(375);
-		WheelFR.writeToMotor(125);
-		WheelBL.writeToMotor(375);
-		WheelBR.writeToMotor(125);
-	}
-	
-	while (is_edge_left()){
-		WheelFL.writeToMotor(125);
-		WheelFR.writeToMotor(375);
-		WheelBL.writeToMotor(125);
-		WheelBR.writeToMotor(375);
 	}
 	
 	delay(10);
