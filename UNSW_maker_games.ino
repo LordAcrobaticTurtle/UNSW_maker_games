@@ -6,6 +6,7 @@
 #include <Servo.h>
 #include <NewPing.h>
 #include <MPU6050_light.h>
+
 #include "serial_input_control.h"
 #include "DeadReckoner_IMU.h"
 #include "GPS2Local.h"
@@ -98,7 +99,9 @@ void setup() {
 		Sonar_init[j] = Sonar[j].ping_cm();
 	}
 	Serial.println("Done!");
-	
+	for (int j = 0; j < 4; j++) {
+      Serial.print(String(Sonar_init[j]) + ",  ");
+    }
 }
 
 int i = 0;
@@ -137,6 +140,10 @@ void loop() {
 		WheelBL.writeToMotor(250);
 		WheelBR.writeToMotor(250);
 	}
+	
+	for (int j = 0; j < NUM_EDGE_SENSORS; j++) {
+      Serial.print(String(Sonar[j].ping_cm()) + ",  ");
+    }
 	
 	delay(10);
 }
