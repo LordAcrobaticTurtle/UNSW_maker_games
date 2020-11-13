@@ -62,10 +62,10 @@ int IN3_2 = 27;
 int IN4_2 = 28;
 
 // Ultrasonic sensors
-NewPing SonarFL(3,2 ,MAX_DISTANCE); // Echo = 2, Trig = 3;     
-NewPing SonarFR(11,12,MAX_DISTANCE); // Echo = 12, Trig = 11
+NewPing SonarFL(37,38 ,MAX_DISTANCE); // Echo = 2, Trig = 3;     
+NewPing SonarFR(11,10,MAX_DISTANCE); // Echo = 12, Trig = 11
 NewPing SonarBL(21,20,MAX_DISTANCE); // Echo = 20, Trig = 21
-NewPing SonarBR(37,38,MAX_DISTANCE); //  Echo = 38, Trig = 37
+NewPing SonarBR(3,2,MAX_DISTANCE); //  Echo = 38, Trig = 37
 
 NewPing Sonar[NUM_EDGE_SENSORS] = {SonarFL, SonarFR, SonarBL, SonarBR};
 double Sonar_init[NUM_EDGE_SENSORS];
@@ -186,4 +186,3 @@ bool is_edge_right(){
 	else
 		return 0;
 }
-
