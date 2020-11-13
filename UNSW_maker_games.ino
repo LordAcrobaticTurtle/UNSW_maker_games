@@ -100,7 +100,7 @@ void setup() {
 	}
 	Serial.println("Done!");
 	for (int j = 0; j < 4; j++) {
-      Serial.print(String(Sonar_init[j]) + ",  ");
+      Serial.print(String("Initial value" + "Sonar_init[j]) + ",  ");
     }
 }
 
@@ -123,16 +123,20 @@ void loop() {
 			WheelBR.writeToMotor(500);
 		}
 		
-		if (is_edge_front())
+		if (is_edge_front()) {
 			timer++;
+			Serial.println("Detecting edge");
+		}
 		
 		if (is_edge_front() && timer > time_edge) {
 			stop = 1;
 			timer = 0;
+			Serial.println("Stopping");
 		}
 		
 		if (~is_edge_front() && timer < time_edge) {
 			timer = 0;
+			Serial.println("False Alarm");
 		}
 	} else {
 		WheelFL.writeToMotor(250);
