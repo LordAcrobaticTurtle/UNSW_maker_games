@@ -152,19 +152,19 @@ void loop() {
   tx.read(channels, &failsafe, &lostframe);
   int throttle = channels[2];
   int yaw = channels[0]; 
-  int mapped_throttle = map(throttle, 172, 1800, -255,255);
+  int mapped_throttle = map(throttle, 172, 1800, 0,500);
   mapped_yaw = map(yaw, 180,1800, -255,255);
   
-  /*int front_pos = map(channels[6], 170,1800,1000,2000);
+  int front_pos = map(channels[6], 170,1800,1000,2000);
   front.writeMicroseconds(front_pos);
   int back_pos = map(channels[7], 170,1800,1000,2000);
   rear.writeMicroseconds(back_pos);
-  */
   
+  /*
   for (int j = 0; j < 4; j++) {
     Serial.println(String(Sonar[j].ping_cm()) + ", ");
-  }
-  drive(throttle, mapped_yaw);
+  }*/
+  drive(mapped_throttle, mapped_yaw);
   
   //int mapped_ESC = map(throttle, 172, 1800, 1000,2000);
   //mapped_ESC = constrain(mapped_ESC,1000,2000);
