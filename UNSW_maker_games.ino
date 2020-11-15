@@ -94,16 +94,14 @@ void setup() {
 int i = 0;
 void loop() {
 	// put your main code here, to run repeatedly:
-  
 	// IMU Dead Reckoning
-	
   tx.read(channels, &failsafe, &lostframe);
   int throttle = channels[2];
   int yaw = channels[0]; 
   int mapped_throttle = map(throttle, 172, 1800, 0,500);
   int mapped_yaw = map(yaw, 182, 1800, -500, 500);
-  ESC.writeMicroSeconds(map(channel[6], 180, 1800,1000,2000));
-  Servo.writeMicroSeconds(map(channel[7], 180,1800,900,2400));
+  ESC.writeMicroseconds(map(channels[6], 180, 1800,1000,2000));
+  brush.writeMicroseconds(map(channels[7], 180,1800,900,2400));
   mapped_yaw = constrain(mapped_yaw, -250,250);
   
   if (i == 4) { 
@@ -129,5 +127,3 @@ void loop() {
   }
   delay(10);
 }
-
-
