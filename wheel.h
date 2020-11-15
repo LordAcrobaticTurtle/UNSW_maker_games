@@ -14,7 +14,7 @@ class wheel {
     bool IN2_state;
     bool left_true = 0;
   public:
-    int setLeftTrue(bool T) {
+    void setLeftTrue(bool T) {
       left_true = T;
     }
     

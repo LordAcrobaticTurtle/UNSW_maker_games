@@ -32,8 +32,8 @@ int verb = 0;
 int timer = 0;
 bool stop = 0;
 
-double threshold = 10;
-#define time_edge 50
+double threshold[4] = {10,10,10,10};
+#define time_edge 4
 
 // Variables
 wheel WheelFR;
@@ -69,6 +69,8 @@ NewPing SonarBR(37,38,MAX_DISTANCE); //  Echo = 38, Trig = 37
 
 NewPing Sonar[NUM_EDGE_SENSORS] = {SonarFL, SonarFR, SonarBL, SonarBR};
 double Sonar_init[NUM_EDGE_SENSORS];
+double Sonar_Prev[NUM_EDGE_SENSORS];
+double Sonar_Now[NUM_EDGE_SENSORS];
 
 void setup() {
 	// put your setup code here, to run once:
@@ -96,20 +98,20 @@ void setup() {
 	// sonar setup
 	Serial.print(F("Getting initial distances"));
 	for (int j = 0; j < NUM_EDGE_SENSORS; j++) {
-		Sonar_init[j] = Sonar[j].ping_cm();
+		Sonar_Prev[j] = Sonar[j].ping_cm();
+		Sonar_Now[j] = Sonar[j].ping_cm();
 	}
 	Serial.println("Done!");
 	for (int j = 0; j < 4; j++) {
-      Serial.print(String("Initial value" + "Sonar_init[j]) + ",  ");
+      Serial.print("Initial value" + String( + Sonar_Prev[j]) + ",  ");
     }
 }
 
-int i = 0;
 void loop() {
 	// put your main code here, to run repeatedly:
 	tx.read(channels, &failsafe, &lostframe);
 	
-	if (channels[5] > 1500) {
+	if (channels[5] > 1500 || 1) {
 		if (stop) {
 			WheelFL.writeToMotor(250);
 			WheelFR.writeToMotor(250);
@@ -123,21 +125,13 @@ void loop() {
 			WheelBR.writeToMotor(500);
 		}
 		
-		if (is_edge_front()) {
-			timer++;
-			Serial.println("Detecting edge");
+		if(is_edge_front())
+			Serial.println("front edge");
+		
+		for (int j = 0; j < NUM_EDGE_SENSORS; j++) {
+			//Serial.print(String(Sonar[j].ping_cm()) + ",  ");
 		}
 		
-		if (is_edge_front() && timer > time_edge) {
-			stop = 1;
-			timer = 0;
-			Serial.println("Stopping");
-		}
-		
-		if (~is_edge_front() && timer < time_edge) {
-			timer = 0;
-			Serial.println("False Alarm");
-		}
 	} else {
 		WheelFL.writeToMotor(250);
 		WheelFR.writeToMotor(250);
@@ -145,45 +139,53 @@ void loop() {
 		WheelBR.writeToMotor(250);
 	}
 	
-	for (int j = 0; j < NUM_EDGE_SENSORS; j++) {
-      Serial.print(String(Sonar[j].ping_cm()) + ",  ");
-    }
-	
 	delay(10);
 }
 
-bool is_first_panel(){
-	if(Sonar[0].ping_cm()-Sonar_init[0] < threshold || Sonar[1].ping_cm()-Sonar_init[1] < threshold)
+void read_ultrasonic(){
+	// read all 4 ultrasonic sensors
+	for (int i = 0; i < NUM_EDGE_SENSORS; i++)
+		Sonar_Now[i] = Sonar[i].ping_cm();
+}
+
+// functions for each sensor; returns 1 with distance gradients chances > threshold
+bool edge(int i){
+	Sonar_Now[i] = Sonar[i].ping_cm();
+	if(abs(Sonar_Now[i]-Sonar_Prev[i]) > threshold[i]) {
+		Sonar_Prev[i] = Sonar_Now[i];
 		return 1;
-	else
+	} else
 		return 0;
 }
 
+
+
+
 bool is_edge_front(){
-	if(Sonar[0].ping_cm()-Sonar_init[0] > threshold || Sonar[1].ping_cm()-Sonar_init[1] > threshold)
+	if(edge(0) && edge(1))
 		return 1;
 	else
 		return 0;
 }
 
 bool is_edge_back(){
-	if(Sonar[2].ping_cm()-Sonar_init[2] > threshold || Sonar[3].ping_cm()-Sonar_init[3] > threshold)
-		return 1;
-	else
-		return 0;
+return 0;
 }
 
 bool is_edge_left(){
-	if(Sonar[0].ping_cm()-Sonar_init[0] > threshold || Sonar[2].ping_cm()-Sonar_init[2] > threshold)
-		return 1;
-	else
-		return 0;
+return 0;
 }
 
 bool is_edge_right(){
-	if(Sonar[1].ping_cm()-Sonar_init[1] > threshold || Sonar[3].ping_cm()-Sonar_init[3] > threshold)
-		return 1;
-	else
-		return 0;
+return 0;
 }
+
+
+bool right_lean(){
+return 0;
+}
+
+
+
+
 
